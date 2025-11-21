@@ -17,7 +17,6 @@
 </head>
 <body>
   <h1>Text Compare Site</h1>
-  <p>Runs entirely in your browser — nothing uploaded anywhere.</p>
 
   <div class="container">
     <div style="flex:1">
@@ -26,20 +25,24 @@
     </div>
     <div style="flex:1">
       <h3>Text 2</h3>
-      <textarea id="text2" style="width:100%; height:180px; border-radius:12px;"></textarea>></textarea>
+      <textarea id="text2" style="width:100%; height:180px; border-radius:12px;"></textarea>
     </div>
   </div>
 
   <button onclick="compareText()">Compare</button>
 
   <div class="result-container" style="display:flex; gap:1rem; margin-top:1rem;">
-    <div class="panel" style="flex:1;">
+    <div style="flex:1;">
       <h3>Text 1</h3>
-      <div id="result-left"></div>
+      <div class="panel">
+        <div id="result-left"></div>
+      </div>
     </div>
-    <div class="panel" style="flex:1;">
+    <div style="flex:1;">
       <h3>Text 2</h3>
-      <div id="result-right"></div>
+      <div class="panel">
+        <div id="result-right"></div>
+      </div>
     </div>
   </div>
 
@@ -51,7 +54,7 @@
     function compareText() {
       const aRaw = document.getElementById('text1').value;
       const bRaw = document.getElementById('text2').value;
-      const a = aRaw.split(/(\s+)/); // keep whitespace tokens
+      const a = aRaw.split(/(\s+)/);
       const b = bRaw.split(/(\s+)/);
 
       const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
@@ -72,13 +75,10 @@
           right.push(escapeHtml(b[j]));
           i++; j++;
         } else if (dp[i+1][j] >= dp[i][j+1]) {
-          // a[i] removed
           left.push(`<span class='removed'>${escapeHtml(a[i])}</span>`);
-          // keep space in right for alignment
           right.push('');
           i++;
         } else {
-          // b[j] added
           right.push(`<span class='added'>${escapeHtml(b[j])}</span>`);
           left.push('');
           j++;
@@ -91,8 +91,6 @@
       document.getElementById('result-left').innerHTML = left.join('');
       document.getElementById('result-right').innerHTML = right.join('');
     }
-
-    // Removed all leftover/stray scroll-sync code to avoid syntax errors.
   </script>
 </body>
 </html>
