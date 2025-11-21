@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Offline Text Compare</title>
+  <title>Text Compare Site</title>
   <style>
     body { font-family: sans-serif; margin: 2rem; }
     .container { display: flex; gap: 1rem; }
-    textarea { width: 100%; height: 300px; }
+    textarea { width: 100%; }
     button { padding: 0.5rem 1rem; border-radius: 8px; margin-top: 1rem; }
     #result { white-space: pre-wrap; font-family: monospace; margin-top: 1rem; }
     .added { background: #7aff7a; }
     .removed { background: #ff7a7a; text-decoration: line-through; }
+    .result-container div.panel { border: 1px solid #ddd; padding: 0.75rem; font-family: monospace; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h1>Offline Text Compare</h1>
+  <h1>Text Compare Site</h1>
   <p>Runs entirely in your browser — nothing uploaded anywhere.</p>
 
   <div class="container">
@@ -34,11 +35,11 @@
   <div class="result-container" style="display:flex; gap:1rem; margin-top:1rem;">
     <div class="panel" style="flex:1;">
       <h3>Text 1 (removed words highlighted)</h3>
-      <div id="result-left" style="height:300px; overflow:auto; border:1px solid #ddd; padding:0.75rem; font-family:monospace; white-space:pre-wrap;"></div>
+      <div id="result-left"></div>
     </div>
     <div class="panel" style="flex:1;">
       <h3>Text 2 (added words highlighted)</h3>
-      <div id="result-right" style="height:300px; overflow:auto; border:1px solid #ddd; padding:0.75rem; font-family:monospace; white-space:pre-wrap;"></div>
+      <div id="result-right"></div>
     </div>
   </div>
 
@@ -91,20 +92,7 @@
       document.getElementById('result-right').innerHTML = right.join('');
     }
 
-    // synced scrolling for results
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const L = document.getElementById('result-left');
-      const R = document.getElementById('result-right');
-      let syncing = false;
-      function sync(src, dst){
-        if(syncing) return;
-        syncing = true;
-        dst.scrollTop = src.scrollTop * (dst.scrollHeight - dst.clientHeight) / (src.scrollHeight - src.clientHeight || 1);
-        setTimeout(()=> syncing = false, 100);
-      }
-      L.addEventListener('scroll', ()=> sync(L,R));
-      R.addEventListener('scroll', ()=> sync(R,L));
-    });
+    // Removed all leftover/stray scroll-sync code to avoid syntax errors.
   </script>
 </body>
 </html>
