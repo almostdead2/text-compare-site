@@ -14,6 +14,9 @@
     .removed { background: #ff7a7a; text-decoration: line-through; }
     .result-container div.panel { border: 1px solid #ddd; padding: 0.75rem; font-family: monospace; white-space: pre-wrap; }
   </style>
+
+  <!-- Only necessary addition: diff-match-patch library (enables huge text support) -->
+  <script src="https://unpkg.com/diff-match-patch"></script>
 </head>
 <body>
   <h1>Text Compare Site</h1>
@@ -48,49 +51,43 @@
 
   <script>
     function escapeHtml(s){
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return s.replace(/&/g,'&amp;')
+              .replace(/</g,'&lt;')
+              .replace(/>/g,'&gt;');
     }
 
     function compareText() {
-      const aRaw = document.getElementById('text1').value;
-      const bRaw = document.getElementById('text2').value;
-      const a = aRaw.split(/(\s+)/);
-      const b = bRaw.split(/(\s+)/);
+      const a = document.getElementById('text1').value;
+      const b = document.getElementById('text2').value;
 
-      const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
+      const dmp = new diff_match_patch();
+      const diffs = dmp.diff_main(a, b);
+      dmp.diff_cleanupSemantic(diffs);
 
-      for (let i = a.length - 1; i >= 0; i--) {
-        for (let j = b.length - 1; j >= 0; j--) {
-          dp[i][j] = (a[i] === b[j] && a[i].trim() !== '') ? 1 + dp[i+1][j+1] : Math.max(dp[i+1][j], dp[i][j+1]);
+      let left = "";
+      let right = "";
+
+      for (const [op, text] of diffs) {
+        const safe = escapeHtml(text);
+
+        if (op === 0) { // no change
+          left += safe;
+          right += safe;
+        }
+        else if (op === -1) { // removed from Text 1
+          left += `<span class="removed">${safe}</span>`;
+          right += safe.replace(/\S/g, ' ');
+        }
+        else if (op === 1) { // added to Text 2
+          right += `<span class="added">${safe}</span>`;
+          left += safe.replace(/\S/g, ' ');
         }
       }
 
-      let i = 0, j = 0;
-      const left = [];
-      const right = [];
-
-      while (i < a.length && j < b.length) {
-        if (a[i] === b[j]) {
-          left.push(escapeHtml(a[i]));
-          right.push(escapeHtml(b[j]));
-          i++; j++;
-        } else if (dp[i+1][j] >= dp[i][j+1]) {
-          left.push(`<span class='removed'>${escapeHtml(a[i])}</span>`);
-          right.push('');
-          i++;
-        } else {
-          right.push(`<span class='added'>${escapeHtml(b[j])}</span>`);
-          left.push('');
-          j++;
-        }
-      }
-
-      while (i < a.length) { left.push(`<span class='removed'>${escapeHtml(a[i])}</span>`); right.push(escapeHtml(a[i]).replace(/\S/g, ' ')); i++; }
-      while (j < b.length) { right.push(`<span class='added'>${escapeHtml(b[j])}</span>`); left.push(escapeHtml(b[j]).replace(/\S/g, ' ')); j++; }
-
-      document.getElementById('result-left').innerHTML = left.join('');
-      document.getElementById('result-right').innerHTML = right.join('');
+      document.getElementById('result-left').innerHTML = left;
+      document.getElementById('result-right').innerHTML = right;
     }
   </script>
+
 </body>
 </html>
